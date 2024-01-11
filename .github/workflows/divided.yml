@@ -1,0 +1,114 @@
+# name: "publish"
+
+# env:
+#   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+#   DOTNET_NOLOGO: true
+#   NuGetDirectory: ${{ github.workspace}}/nuget
+#   TagVersionPrefix: "v"
+#   TagFileName: ${{ github.workspace}}/tagfile.txt
+
+# on:
+#   push:
+#     branches:
+#       - "master"
+
+# jobs:
+#   create_nuget:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - uses: actions/checkout@v3
+#       with:
+#         fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
+#     - name: Generate Git Tag
+#       id: generate_tag
+#       run: |
+#           VERSION_MAJOR_MINOR="1.0"
+#           VERSION_SEARCH="${TagVersionPrefix}${VERSION_MAJOR_MINOR}"
+#           GIT_TAG_LIST=$(git tag --list "${VERSION_SEARCH}.*")
+#           echo "GIT_TAG_LIST: $GIT_TAG_LIST"
+#           SORTED_GIT_TAG_LIST=$(echo "$GIT_TAG_LIST" | sort -rV)
+#           echo "SORTED_GIT_TAG_LIST: $SORTED_GIT_TAG_LIST"
+#           VERSION_PATCH=$(echo "$SORTED_GIT_TAG_LIST" | head -n 1)
+#           echo "VERSION_PATCH: $VERSION_PATCH"
+#           if [ -z "$VERSION_PATCH" ]; then
+#             VERSION_PATCH=0
+#           else
+#             VERSION_PATCH=$(echo "$SORTED_GIT_TAG_LIST" | head -n 1 | grep -oE '[0-9]+$')
+#           fi
+#           echo "VERSION_PATCH: $VERSION_PATCH"
+#           FINAL_VERSION="${VERSION_MAJOR_MINOR}.${VERSION_PATCH}"
+#           echo "Version: $FINAL_VERSION"
+#           echo "FINAL_VERSION=$FINAL_VERSION" >> $GITHUB_ENV
+#           echo $FINAL_VERSION > ${{ env.TagFileName }}
+#     # Install the .NET SDK indicated in the global.json file
+#     - name: Setup .NET
+#       uses: actions/setup-dotnet@v4
+
+#     # Create the NuGet package in the folder from the environment variable NuGetDirectory
+#     - run: dotnet pack --configuration Release --output ${{ env.NuGetDirectory }} /p:Version=$FINAL_VERSION -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+
+#     # Publish the NuGet package as an artifact, so they can be used in the following jobs
+#     - name: Upload nugets
+#       uses: actions/upload-artifact@v3
+#       with:
+#         name: nuget
+#         if-no-files-found: error
+#         retention-days: 7
+#         path: |
+#             ${{ env.NuGetDirectory }}/*.nupkg
+#     - name: Upload version file
+#       uses: actions/upload-artifact@v3
+#       with:
+#         name: version_file
+#         if-no-files-found: error
+#         retention-days: 1
+#         path: |
+#             ${{ env.TagFileName }}
+
+
+#   deploy:
+#     # Publish only when creating a GitHub Release
+#     # https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository
+#     # You can update this logic if you want to manage releases differently
+#     runs-on: ubuntu-latest
+#     needs: [ create_nuget ]
+#     steps:
+#       # Download the NuGet package created in the previous job
+#       - uses: actions/download-artifact@v3
+#         with:
+#           name: nuget
+#           path: ${{ env.NuGetDirectory }}
+#       - run: ls
+#       - run: ls ${{ env.NuGetDirectory }}
+#       # Install the .NET SDK indicated in the global.json file
+#       - name: Setup .NET Core
+#         uses: actions/setup-dotnet@v4
+
+#       # Publish all NuGet packages to NuGet.org
+#       # Use --skip-duplicate to prevent errors if a package with the same version already exists.
+#       # If you retry a failed workflow, already published packages will be skipped without error.
+#       - name: Publish NuGet package
+#         run:  for file in ${{ env.NuGetDirectory }}/*.nupkg; do dotnet nuget push "$file" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate; done
+
+#   tag-release:
+#     name: "Pre Release"
+#     runs-on: "ubuntu-latest"
+#     needs: [ deploy ]
+#     steps:
+#       - uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
+#       - uses: actions/download-artifact@v3
+#         with:
+#           name: version_file
+#           path: .
+#       - name: Push Git Tag
+#         run: |
+#              FINAL_VERSION=$(cat ${{ env.TagFileName }})
+#              echo "Pushing tag for version: $FINAL_VERSION"
+#              NEW_TAG="${TagVersionPrefix}${FINAL_VERSION}"
+#              echo "Tag name: $NEW_TAG"
+#              git config user.name "GitHub Actions"
+#              git config user.email "github-actions@users.noreply.github.com"
+#              git tag $NEW_TAG
+#              git push origin $NEW_TAG

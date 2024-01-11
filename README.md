@@ -1,6 +1,6 @@
 # AKI.TelegramBot
 
-This repository contains a Telegram Bot framework implemented in C# using the Telegram.Bot library. The framework aims to provide developers with a convenient and extensible solution for building Telegram Bots, similar to how Microsoft provides a framework for web APIs.
+This repository contains a Telegram Bot framework implemented in C# using the Telegram.Bot library. The framework provides a convenient and extensible solution for building modular Telegram Bots.
 
 ## Project Goals
 - **Modularity**: Build Telegram Bots with modular components, allowing easy customization and extension.
@@ -44,10 +44,12 @@ In this example, we create a new `Host` using `Host.CreateDefaultBuilder` and co
 Please note that you need to replace `"YOUR_BOT_TOKEN"` with your actual bot token obtained from the BotFather on Telegram.
 
 ## Getting Started
-1. Clone the repository
-2. Build and run the project using a C# development environment
-3. Customize the bot's functionality by adding handlers, middleware, and modules
-4. Deploy the bot to a server or cloud platform for hosting
+
+To install the package, you can use the following command in the Nuget Package Manager console:
+
+```
+Install-Package AKI.TelegramBot.Hosting
+```
 
 ## Contributing
 Contributions are welcome! If you find a bug or have a feature request, please open an issue. Pull requests are also appreciated.
