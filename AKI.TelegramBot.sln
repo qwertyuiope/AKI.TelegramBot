@@ -13,8 +13,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".config", ".config", "{5511
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		global.json = global.json
 		nuget.config = nuget.config
 		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ci", "ci", "{ED1EB3C3-4322-46F0-B2D1-855630C62C56}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\publish.yml = .github\workflows\publish.yml
+		.github\workflows\divided.yml = .github\workflows\divided.yml
 	EndProjectSection
 EndProject
 Global
@@ -38,6 +45,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{ED1EB3C3-4322-46F0-B2D1-855630C62C56} = {5511B772-15B3-4FB9-9152-1D0E0A88870D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D12FE56D-71A3-4552-90C5-8CEF290C2906}

@@ -1,11 +1,28 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.1</TargetFramework>
 		<LangVersion>latest</LangVersion>
-	</PropertyGroup>
+    <DebugSymbols>true</DebugSymbols>
+    <Authors>AronK</Authors>
+    <PackageId>AKI.TelegramBot.Hosting</PackageId>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/qwertyuiope/AKI.TelegramBot</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/qwertyuiope/AKI.TelegramBot</RepositoryUrl>
+    <PackageTags>"Telegram, Bot, Hosting, Asynchronous, Middleware, Routing, Command Handling, .NET, Extensions"</PackageTags>
+    <Description>The AKI.TelegramBot.Hosting package provides a set of tools and abstractions for creating, managing, and extending Telegram bots in .NET. It includes features for handling messages, commands, routing, and more, with async support for enhanced performance.</Description>
+    <PackageIcon>nuget_icon.png</PackageIcon>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
 
-	<ItemGroup>
+  <ItemGroup>
+    <None Include="../../nuget_icon.png" Pack="true" PackagePath="" />
+    <None Include="../../README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+
+  <ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
 		<PackageReference Include="Serilog" Version="3.1.1" />

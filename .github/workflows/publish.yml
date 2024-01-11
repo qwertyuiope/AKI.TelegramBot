@@ -1,0 +1,57 @@
+name: "publish"
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  NuGetDirectory: ${{ github.workspace}}/nuget
+  TagVersionPrefix: "v"
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  pack_publish_tag:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
+    - name: Generate Git Tag
+      id: generate_tag
+      run: |
+          VERSION_MAJOR_MINOR="1.0"
+          VERSION_SEARCH="${TagVersionPrefix}${VERSION_MAJOR_MINOR}"
+          GIT_TAG_LIST=$(git tag --list "${VERSION_SEARCH}.*")
+          echo "GIT_TAG_LIST: $GIT_TAG_LIST"
+          if [ -z "$GIT_TAG_LIST" ]; then
+              echo 'No tags found, setting patch as 0'
+              VERSION_PATCH=0
+          else
+              VERSION_PATCH=$(( $(echo "$GIT_TAG_LIST" | sort -rV | head -n 1 | grep -oE '[0-9]+$') + 1 ))
+          fi          
+          echo "VERSION_PATCH: $VERSION_PATCH"
+          FINAL_VERSION="${VERSION_MAJOR_MINOR}.${VERSION_PATCH}"
+          echo "Version: $FINAL_VERSION"
+          echo "FINAL_VERSION=$FINAL_VERSION" >> $GITHUB_ENV
+
+    # Install the .NET SDK indicated in the global.json file
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+
+    # Create the NuGet package in the folder from the environment variable NuGetDirectory
+    - name: Pack
+      run: dotnet pack --configuration Release --output ${{ env.NuGetDirectory }} /p:Version=$FINAL_VERSION -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+
+    - name: Publish NuGet package
+      run:  for file in ${{ env.NuGetDirectory }}/*.nupkg; do dotnet nuget push "$file" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate; done
+
+    - name: Push Git Tag
+      run: |
+           NEW_TAG="${TagVersionPrefix}${FINAL_VERSION}"
+           echo "Tag name: $NEW_TAG"
+           git config user.name "GitHub Actions"
+           git config user.email "github-actions@users.noreply.github.com"
+           git tag $NEW_TAG
+           git push origin $NEW_TAG
