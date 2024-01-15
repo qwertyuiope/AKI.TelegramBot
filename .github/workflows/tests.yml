@@ -34,4 +34,4 @@ jobs:
         retention-days: 7
         path: ${{ env.BuildDirectory }}
     - name: Test
-      run:  dotnet test ./test/AKI.TelegramBot.UnitTests/AKI.TelegramBot.UnitTests.csproj --configuration Release --no-restore --no-build - o ${{ env.BuildDirectory }}
+      run:  dotnet test ./test/AKI.TelegramBot.UnitTests/AKI.TelegramBot.UnitTests.csproj --configuration Release --no-restore --no-build --output ${{ env.BuildDirectory }}
