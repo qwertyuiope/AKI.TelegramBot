@@ -1,0 +1,35 @@
+name: "publish"
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_NOLOGO: true
+  NuGetDirectory: ${{ github.workspace}}/nuget
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  pack_publish_tag:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    # Install the .NET SDK indicated in the global.json file
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+
+    # Create the NuGet package in the folder from the environment variable NuGetDirectory
+    - name: Build
+      run: dotnet build --configuration Release -o ${{ env.NuGetDirectory }}
+    # Publish the NuGet package as an artifact, so they can be used in the following jobs
+    - name: Upload binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: nuget
+        if-no-files-found: error
+        retention-days: 7
+        path: |
+            ${{ env.NuGetDirectory }}/*.nupkg
+    - name: Test
+      run:  dotnet test --configuration Release --no-restore --no-build - o ${{ env.NuGetDirectory }}

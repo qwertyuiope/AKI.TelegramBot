@@ -21,14 +21,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ci", "ci", "{ED1EB3C3-4322-46F0-B2D1-855630C62C56}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\publish.yml = .github\workflows\publish.yml
-		.github\workflows\divided.yml = .github\workflows\divided.yml
+		.github\workflows\tests.yml = .github\workflows\tests.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C6846A0B-AD63-4504-818F-058171F6D19D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6B343535-E7A3-4E12-BABE-7C629898BC90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AKI.TelegramBot.UnitTests", "test\AKI.TelegramBot.UnitTests\AKI.TelegramBot.UnitTests.csproj", "{ABB3999D-F970-490A-AAE6-B71A4E85A3E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AKI.TelegramBot.UnitTests", "test\AKI.TelegramBot.UnitTests\AKI.TelegramBot.UnitTests.csproj", "{ABB3999D-F970-490A-AAE6-B71A4E85A3E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
