@@ -11,6 +11,46 @@ using Telegram.Bot;
 namespace AKI.TelegramBot.Hosting;
 public static class Extensions
 {
+    //public static IHostBuilder AddTelegramBot(this IHostBuilder hostBuilder, Action<TelegramConfiguration> telegramBotClientOptionsSetup, Action<ITelegramServiceBuilder> telegramBuilder)
+    //{
+    //    return AddTelegramBot(hostBuilder, config =>
+    //    {
+    //        var telegramConfiguration = config.GetSection(TelegramConfiguration.ConfigurationName).Get<TelegramConfiguration>();
+    //        telegramBotClientOptionsSetup?.Invoke(telegramConfiguration);
+    //        return telegramConfiguration;
+    //    }, telegramBuilder);
+    //}
+    //public static IHostBuilder AddTelegramBot(this IHostBuilder hostBuilder, Func<IConfiguration, TelegramConfiguration> telegramBotClientOptionsSetup, Action<ITelegramServiceBuilder> telegramBuilder)
+    //{
+    //    hostBuilder.ConfigureServices((context, services) =>
+    //    {
+    //        var telegramConfiguration = telegramBotClientOptionsSetup?.Invoke(context.Configuration)
+    //        ?? context.Configuration.GetSection(TelegramConfiguration.ConfigurationName).Get<TelegramConfiguration>();
+    //        var telegramServiceBuilder = services.AddTelegramBot(telegramConfiguration);
+    //        telegramBuilder.Invoke(telegramServiceBuilder);
+    //    });
+    //    return hostBuilder;
+    //}
+
+    public static ITelegramServiceBuilder AddTelegramBot(this IServiceCollection services, Action<TelegramConfiguration> telegramBotClientOptionsSetup)
+    {
+        var options = new TelegramConfiguration
+        {
+            MessageWorkers = 1
+        };
+        telegramBotClientOptionsSetup?.Invoke(options);
+        return AddTelegramBot(services, options);
+    }
+    public static ITelegramServiceBuilder AddTelegramBot(this IServiceCollection services, string botToken)
+    {
+        var options = new TelegramConfiguration
+        {
+            MessageWorkers = 1,
+            BotToken = botToken
+        };
+        return AddTelegramBot(services, options);
+    }
+
     public static ITelegramServiceBuilder AddTelegramBot(this IServiceCollection services,
        TelegramConfiguration telegramBotClientOptions)
     {
@@ -24,7 +64,7 @@ public static class Extensions
             httpClientBuilder.ConfigurePrimaryHttpMessageHandler(() =>
                 new HttpClientHandler
                 {
-                    ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; }
+                    ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
                 }
            );
         }
@@ -41,13 +81,13 @@ public static class Extensions
 
         services.AddHostedService<TelegramPollingWorker>();
 
-        //var scopedServicesContainer = services.AddNamedContainer<TelegramHandlerBase>();
-
         return new TelegramServiceBuilder(services);
     }
 
     private static void ValidateConfiguration(TelegramConfiguration telegramBotClientOptions)
     {
+        ArgumentNullException.ThrowIfNull(telegramBotClientOptions);
+
         telegramBotClientOptions.MessageWorkers = Math.Max(1, telegramBotClientOptions.MessageWorkers);
     }
 }
