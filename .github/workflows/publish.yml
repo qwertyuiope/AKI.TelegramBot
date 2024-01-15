@@ -79,10 +79,10 @@ jobs:
 
     # Create the NuGet package in the folder from the environment variable BuildDirectory
     - name: Pack
-      run: dotnet pack --configuration Release --output ${{ env.BuildDirectory }} --no-restore --no-build --include-source --include-symbols /p:Version=$FINAL_VERSION
+      run: dotnet pack --configuration Release --output ${{ env.BuildDirectory }} --no-restore --no-build --include-source --include-symbols /p:Version=$FINAL_VERSION /p:OutputPath=./Publish
 
     - name: Publish NuGet package
-      run:  for file in ${{ env.BuildDirectory }}/*.nupkg; do dotnet nuget push "$file" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate; done
+      run:  for file in ./Publish/*.nupkg; do dotnet nuget push "$file" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate; done
 
     - name: Push Git Tag
       run: |
