@@ -3,13 +3,22 @@ name: "publish"
 env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
   DOTNET_NOLOGO: true
-  NuGetDirectory: ${{ github.workspace}}/nuget
+  BuildDirectory: ${{ github.workspace}}/build
   TagVersionPrefix: "v"
+
+# on:
+#   push:
+#     branches:
+#       - "master"
 
 on:
   push:
     branches:
-      - "master"
+      - master
+  workflow_run:
+    workflows: ["Build & Test"]
+    types:
+      - completed
 
 jobs:
   pack_publish_tag:
@@ -39,13 +48,18 @@ jobs:
     # Install the .NET SDK indicated in the global.json file
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
+      # Download the NuGet package created in the previous job
+    - uses: actions/download-artifact@v3
+      with:
+        name: build
+        path: .
 
-    # Create the NuGet package in the folder from the environment variable NuGetDirectory
+    # Create the NuGet package in the folder from the environment variable BuildDirectory
     - name: Pack
-      run: dotnet pack --configuration Release --output ${{ env.NuGetDirectory }} /p:Version=$FINAL_VERSION -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+      run: dotnet pack --configuration Release --output ${{ env.BuildDirectory }} --no-restore --no-build --include-source --include-symbols /p:Version=$FINAL_VERSION
 
     - name: Publish NuGet package
-      run:  for file in ${{ env.NuGetDirectory }}/*.nupkg; do dotnet nuget push "$file" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate; done
+      run:  for file in ${{ env.BuildDirectory }}/*.nupkg; do dotnet nuget push "$file" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate; done
 
     - name: Push Git Tag
       run: |
