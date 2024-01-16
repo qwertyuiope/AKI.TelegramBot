@@ -57,6 +57,8 @@ jobs:
           echo "FINAL_VERSION=$FINAL_VERSION" >> $GITHUB_ENV
     - name: Pack
       run: dotnet pack --configuration Release --output ${{ env.BuildDirectory }} --no-restore --no-build --include-source --include-symbols /p:Version=$FINAL_VERSION
+    - name: Upload binaries
+      uses: actions/upload-artifact@v3
       with:
         name: build
         if-no-files-found: error
