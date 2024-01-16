@@ -55,12 +55,10 @@ jobs:
          path: './test/AKI.TelegramBot.UnitTests/TestResults/test-results.trx'
          reporter: 'dotnet-trx'
     - name: Code Coverage Report
-      uses: irongut/CodeCoverageSummary@v1.3.0
+      uses: 5monkeys/cobertura-action@master
       with:
-        filename: './**/TestResults/**/*.cobertura.xml'
-        badge: true
-        format: markdown
-        output: both
+        path: ./**/TestResults/**/*.cobertura.xml
+        minimum_coverage: 0
     - name: Upload coverage into summary
       run: cat $GITHUB_WORKSPACE/coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
     - name: Archive code coverage results
