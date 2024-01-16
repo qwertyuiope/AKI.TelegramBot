@@ -86,8 +86,8 @@ jobs:
       with:
         name: build
         path: ${{ env.BuildDirectory }}
-    # - run:  ls
-    # - run:  ls ${{ env.BuildDirectory }}
+    - run:  ls
+    - run:  ls ${{ env.BuildDirectory }}
     - name: Push NuGet packages
       run:  for file in ${{ env.BuildDirectory }}/*.{nupkg,snupkg}; do dotnet nuget push "$file" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate; done
     - name: Set Git Tag
@@ -96,5 +96,5 @@ jobs:
            echo "Tag name: $NEW_TAG"
            git config user.name "GitHub Actions"
            git config user.email "github-actions@users.noreply.github.com"
-           git tag $NEW_TAG
+           git tag -a $NEW_TAG -m "Release version $NEW_TAG"
            git push origin $NEW_TAG
