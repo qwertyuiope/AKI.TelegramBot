@@ -24,6 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
     # Install the .NET SDK indicated in the global.json file
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -36,26 +38,8 @@ jobs:
     - name: Test
       run:  dotnet test ./test/AKI.TelegramBot.UnitTests/AKI.TelegramBot.UnitTests.csproj --configuration Release --no-restore --no-build
     # Publish the NuGet package as an artifact, so they can be used in the following jobs
-    - name: Publish
-      run: dotnet publish --configuration Release --no-restore --no-build -o ${{ env.BuildDirectory }}
-    - name: Upload binaries
-      uses: actions/upload-artifact@v3
-      with:
-        name: build
-        if-no-files-found: error
-        retention-days: 7
-        path: ${{ env.BuildDirectory }}
-
-  pack_publish_tag:
-    runs-on: ubuntu-latest
-    needs: build_tests
-    if: github.ref == 'refs/heads/master'
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
-    - name: Generate Git Tag
-      id: generate_tag
+    - name: Define Version
+      id: define_version
       run: |
           VERSION_MAJOR_MINOR="1.0"
           VERSION_SEARCH="${TagVersionPrefix}${VERSION_MAJOR_MINOR}"
@@ -68,9 +52,27 @@ jobs:
               VERSION_PATCH=$(( $(echo "$GIT_TAG_LIST" | sort -rV | head -n 1 | grep -oE '[0-9]+$') + 1 ))
           fi          
           echo "VERSION_PATCH: $VERSION_PATCH"
-          FINAL_VERSION="${VERSION_MAJOR_MINOR}.${VERSION_PATCH}"
+          export FINAL_VERSION="${VERSION_MAJOR_MINOR}.${VERSION_PATCH}"
           echo "Version: $FINAL_VERSION"
           echo "FINAL_VERSION=$FINAL_VERSION" >> $GITHUB_ENV
+    - name: Pack
+      run: dotnet pack --configuration Release --output ${{ env.BuildDirectory }} --no-restore --no-build --include-source --include-symbols /p:Version=$FINAL_VERSION
+      with:
+        name: build
+        if-no-files-found: error
+        retention-days: 7
+        path: ${{ env.BuildDirectory }}
+    outputs:
+     final_version: ${{ steps.define_version.outputs.FINAL_VERSION }}
+
+  pack_publish_tag:
+    runs-on: ubuntu-latest
+    needs: build_tests
+    if: github.ref == 'refs/heads/master'
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # Get all history to allow automatic versioning using MinVer
 
     # Install the .NET SDK indicated in the global.json file
     - name: Setup .NET
@@ -82,17 +84,11 @@ jobs:
         path: ${{ env.BuildDirectory }}
     - run:  ls
     - run:  ls ${{ env.BuildDirectory }}
-
-    # Create the NuGet package in the folder from the environment variable BuildDirectory
-    - name: Pack
-      run: dotnet pack --configuration Release --output ./Publish --no-restore --no-build --include-source --include-symbols /p:Version=$FINAL_VERSION /p:OutputPath=${{ env.BuildDirectory }}
-
     - name: Publish NuGet package
       run:  for file in ./Publish/*.nupkg; do dotnet nuget push "$file" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate; done
-
     - name: Push Git Tag
       run: |
-           NEW_TAG="${TagVersionPrefix}${FINAL_VERSION}"
+           NEW_TAG="${TagVersionPrefix}${{needs.build_tests.outputs.final_version}}"
            echo "Tag name: $NEW_TAG"
            git config user.name "GitHub Actions"
            git config user.email "github-actions@users.noreply.github.com"
