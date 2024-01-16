@@ -37,14 +37,23 @@ jobs:
     - name: Dotnet Build
       run: dotnet build --configuration Release --no-restore
     - name: Dotnet Test
-      run:  dotnet test ./test/AKI.TelegramBot.UnitTests/AKI.TelegramBot.UnitTests.csproj --configuration Release --no-restore --no-build --collect "Code Coverage;Format=cobertura" --results-directory "UnitTestsResults"
+      run:  dotnet test ./test/AKI.TelegramBot.UnitTests/AKI.TelegramBot.UnitTests.csproj --configuration Release --no-restore --no-build --collect "Code Coverage;Format=cobertura" --logger "junit;LogFilePath=./TestResults/test-results.xml"
     # Publish the NuGet package as an artifact, so they can be used in the following jobs
-    - name: Upload dotnet test results
+    - name: Upload Test Results
       uses: actions/upload-artifact@v3
       with:
-        name: dotnet--unitTests-results
-        path: UnitTestsResults
+        name: Test Results
+        path: |
+            ./TestResults/test-results.xml
+            ./**/TestResults/**/*.cobertura.xml
       if: ${{ always() }}
+    -  name: Publish Test Report
+       uses: dorny/test-reporter@v1
+       if: always() # This ensures that the test report is published even if the test step fails
+       with:
+         name: 'Test Results'
+         path: './TestResults/test-results.xml'
+         reporter: 'junit'
     - name: ReportGenerator
       uses: danielpalme/ReportGenerator-GitHub-Action@5.2.0
       with:
