@@ -52,8 +52,9 @@ jobs:
               VERSION_PATCH=$(( $(echo "$GIT_TAG_LIST" | sort -rV | head -n 1 | grep -oE '[0-9]+$') + 1 ))
           fi          
           echo "VERSION_PATCH: $VERSION_PATCH"
-          export FINAL_VERSION="${VERSION_MAJOR_MINOR}.${VERSION_PATCH}"
+          FINAL_VERSION="${VERSION_MAJOR_MINOR}.${VERSION_PATCH}"
           echo "Version: $FINAL_VERSION"
+          echo "FINAL_VERSION=$FINAL_VERSION" >> $GITHUB_OUTPUT
           echo "FINAL_VERSION=$FINAL_VERSION" >> $GITHUB_ENV
     - name: Pack
       run: dotnet pack --configuration Release --output ${{ env.BuildDirectory }} --no-restore --no-build --include-source --include-symbols /p:Version=$FINAL_VERSION
