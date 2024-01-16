@@ -56,8 +56,10 @@ public static class Extensions
     {
         ValidateConfiguration(telegramBotClientOptions);
 
+        var telegramOptions = new TelegramBotClientOptions(telegramBotClientOptions.BotToken, telegramBotClientOptions.BaseUrl);
+
         var httpClientBuilder = services.AddHttpClient("telegram_bot_client")
-            .AddTypedClient<ITelegramBotClient>((httpClient, sp) => new TelegramBotClient(telegramBotClientOptions.BotToken, httpClient));
+            .AddTypedClient<ITelegramBotClient>((httpClient, sp) => new TelegramBotClient(telegramOptions, httpClient));
 
         if (telegramBotClientOptions.SkipSslValidation)
         {
@@ -89,5 +91,9 @@ public static class Extensions
         ArgumentNullException.ThrowIfNull(telegramBotClientOptions);
 
         telegramBotClientOptions.MessageWorkers = Math.Max(1, telegramBotClientOptions.MessageWorkers);
+
+        if (telegramBotClientOptions.BaseUrl != null && !Uri.TryCreate(telegramBotClientOptions.BaseUrl, UriKind.Absolute, out _))
+            telegramBotClientOptions.BaseUrl = null;
+
     }
 }
