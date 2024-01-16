@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <DebugSymbols>true</DebugSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Authors>AronK</Authors>
     <PackageId>AKI.TelegramBot.Hosting</PackageId>
     <RepositoryType>git</RepositoryType>

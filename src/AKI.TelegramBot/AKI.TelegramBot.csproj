@@ -5,6 +5,7 @@
 	  <LangVersion>latest</LangVersion>
     <EmbedAllSources>true</EmbedAllSources>
     <DebugSymbols>true</DebugSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Authors>AronK</Authors>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/qwertyuiope/AKI.TelegramBot</RepositoryUrl>
