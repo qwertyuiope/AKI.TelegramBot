@@ -95,5 +95,8 @@ public static class Extensions
         if (telegramBotClientOptions.BaseUrl != null && !Uri.TryCreate(telegramBotClientOptions.BaseUrl, UriKind.Absolute, out _))
             telegramBotClientOptions.BaseUrl = null;
 
+        if (telegramBotClientOptions.BotToken is null)
+            ArgumentNullException.ThrowIfNull(telegramBotClientOptions.BotToken);
+
     }
 }

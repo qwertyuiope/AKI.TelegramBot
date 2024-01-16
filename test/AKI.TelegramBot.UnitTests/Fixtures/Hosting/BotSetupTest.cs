@@ -14,7 +14,10 @@ namespace AKI.TelegramBot.UnitTests.Fixtures.Hosting
         public async Task Test()
         {
             //Arrange
-            var config = new TelegramConfiguration { };
+            var config = new TelegramConfiguration
+            {
+                BotToken = ""
+            };
             IHost host = Host.CreateDefaultBuilder().ConfigureServices(services =>
             {
                 services.AddTelegramBot(config).BotSetup<BotSetup>();
