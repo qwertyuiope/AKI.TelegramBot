@@ -37,7 +37,7 @@ jobs:
     - name: Dotnet Build
       run: dotnet build --configuration Release --no-restore
     - name: Dotnet Test
-      run:  dotnet test ./test/AKI.TelegramBot.UnitTests/AKI.TelegramBot.UnitTests.csproj --configuration Release --no-restore --no-build --collect "Code Coverage;Format=cobertura" --logger "trx;LogFileName=test-results.trx"
+      run:  dotnet test ./test/AKI.TelegramBot.UnitTests/AKI.TelegramBot.UnitTests.csproj --configuration Release --no-restore --no-build --collect "Code Coverage;Format=cobertura" --logger "trx;LogFileName=./test-results.trx"
     # Publish the NuGet package as an artifact, so they can be used in the following jobs
     - name: Upload Test Results
       uses: actions/upload-artifact@v3
