@@ -63,7 +63,9 @@ jobs:
         name: build
         if-no-files-found: error
         retention-days: 7
-        path: ${{ env.BuildDirectory }}
+        path: |
+            ${{ env.BuildDirectory/*.nupkg }}
+            ${{ env.BuildDirectory/*.snupkg }}
     outputs:
      final_version: ${{ steps.define_version.outputs.FINAL_VERSION }}
 
@@ -87,7 +89,7 @@ jobs:
     - run:  ls
     - run:  ls ${{ env.BuildDirectory }}
     - name: Publish NuGet package
-      run:  for file in ./Publish/*.nupkg; do dotnet nuget push "$file" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate; done
+      run:  for file in ${{ env.BuildDirectory }}/*.{nupkg,snupkg}; do dotnet nuget push "$file" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate; done
     - name: Push Git Tag
       run: |
            NEW_TAG="${TagVersionPrefix}${{needs.build_tests.outputs.final_version}}"
