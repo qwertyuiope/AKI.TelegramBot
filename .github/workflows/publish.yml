@@ -32,8 +32,12 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --configuration Release -o ${{ env.BuildDirectory }} --no-restore
+      run: dotnet build --configuration Release --no-restore
+    - name: Test
+      run:  dotnet test ./test/AKI.TelegramBot.UnitTests/AKI.TelegramBot.UnitTests.csproj --configuration Release --no-restore --no-build
     # Publish the NuGet package as an artifact, so they can be used in the following jobs
+    - name: Publish
+      run: dotnet publish --configuration Release --no-restore --no-build -o ${{ env.BuildDirectory }}
     - name: Upload binaries
       uses: actions/upload-artifact@v3
       with:
@@ -41,8 +45,6 @@ jobs:
         if-no-files-found: error
         retention-days: 7
         path: ${{ env.BuildDirectory }}
-    - name: Test
-      run:  dotnet test ./test/AKI.TelegramBot.UnitTests/AKI.TelegramBot.UnitTests.csproj --configuration Release --no-restore --no-build --output ${{ env.BuildDirectory }}
 
   pack_publish_tag:
     runs-on: ubuntu-latest
