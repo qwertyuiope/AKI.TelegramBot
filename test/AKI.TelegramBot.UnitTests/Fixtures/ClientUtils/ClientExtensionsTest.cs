@@ -52,7 +52,7 @@ namespace AKI.TelegramBot.UnitTests.Fixtures.ClientUtils
             var result = await _telegramClient.SendMarkDownMessages(chatId, text, cancellationToken, replyMarkup, messageId, lastMsgStartIdx);
 
             // Assert
-            Assert.IsNotNull(result);
+            Assert.That(result, Is.Not.Null);
             Assert.That(result.Messages.Length, Is.EqualTo(1));
             Assert.That(result.Messages.FirstOrDefault().Text, Is.EqualTo(expected));
         }
@@ -118,7 +118,7 @@ namespace AKI.TelegramBot.UnitTests.Fixtures.ClientUtils
             var result = await _telegramClient.SendMessages(chatId, text, parseMode, cancellationToken, replyMarkup, messageId, lastMsgStartIdx);
 
             // Assert
-            Assert.IsNotNull(result);
+            Assert.That(result, Is.Not.Null);
         }
 
     }

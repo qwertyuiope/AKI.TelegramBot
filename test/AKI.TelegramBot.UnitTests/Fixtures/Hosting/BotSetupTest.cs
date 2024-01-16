@@ -24,16 +24,16 @@ namespace AKI.TelegramBot.UnitTests.Fixtures.Hosting
             }).Build();
 
             //Act & Assert
-            Assert.IsFalse(BotSetup.Started);
+            Assert.That(BotSetup.Started,Is.False);
 
             await host.StartAsync(cancellationToken: CancellationToken.None);
 
-            Assert.IsTrue(BotSetup.Started);
-            Assert.IsFalse(BotSetup.Stopped);
+            Assert.That(BotSetup.Started, Is.True);
+            Assert.That(BotSetup.Stopped, Is.False);
 
             await host.StopAsync(cancellationToken: CancellationToken.None);
 
-            Assert.IsTrue(BotSetup.Stopped);
+            Assert.That(BotSetup.Stopped, Is.True);
 
 
         }
