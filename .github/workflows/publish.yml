@@ -37,8 +37,14 @@ jobs:
     - name: Dotnet Build
       run: dotnet build --configuration Release --no-restore
     - name: Dotnet Test
-      run:  dotnet test ./test/AKI.TelegramBot.UnitTests/AKI.TelegramBot.UnitTests.csproj --configuration Release --no-restore --no-build --collect "Code Coverage;Format=cobertura"
+      run:  dotnet test ./test/AKI.TelegramBot.UnitTests/AKI.TelegramBot.UnitTests.csproj --configuration Release --no-restore --no-build --collect "Code Coverage;Format=cobertura" --results-directory "UnitTestsResults"
     # Publish the NuGet package as an artifact, so they can be used in the following jobs
+    - name: Upload dotnet test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: dotnet--unitTests-results
+        path: UnitTestsResults
+      if: ${{ always() }}
     - name: ReportGenerator
       uses: danielpalme/ReportGenerator-GitHub-Action@5.2.0
       with:
