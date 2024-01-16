@@ -38,6 +38,8 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     - name: Dotnet Test
       run:  dotnet test ./test/AKI.TelegramBot.UnitTests/AKI.TelegramBot.UnitTests.csproj --configuration Release --no-restore --no-build --collect "Code Coverage;Format=cobertura" --logger "trx;LogFileName=./test-results.trx"
+    # - run: ls
+    # - run: ls ./test/AKI.TelegramBot.UnitTests/TestResults
     # Publish the NuGet package as an artifact, so they can be used in the following jobs
     - name: Upload Test Results
       uses: actions/upload-artifact@v3
@@ -52,12 +54,13 @@ jobs:
          name: 'Test Results'
          path: './test/AKI.TelegramBot.UnitTests/TestResults/test-results.trx'
          reporter: 'dotnet-trx'
-    - name: ReportGenerator
-      uses: danielpalme/ReportGenerator-GitHub-Action@5.2.0
+    - name: Code Coverage Report
+      uses: irongut/CodeCoverageSummary@v1.3.0
       with:
-        reports: './**/TestResults/**/*.cobertura.xml'
-        targetdir: '${{ github.workspace }}/coveragereport'
-        reporttypes: 'MarkdownSummaryGithub'
+        filename: './**/TestResults/**/*.cobertura.xml'
+        badge: true
+        format: markdown
+        output: both
     - name: Upload coverage into summary
       run: cat $GITHUB_WORKSPACE/coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
     - name: Archive code coverage results
