@@ -89,7 +89,7 @@ jobs:
     - run:  ls
     - run:  ls ${{ env.BuildDirectory }}
     - name: Push NuGet packages
-      run:  for file in ${{ env.BuildDirectory }}/*.{nupkg,snupkg}; do dotnet nuget push "$file" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate; done
+      run:  for file in ${{ env.BuildDirectory }}/*.nupkg; do dotnet nuget push "$file" --api-key "${{ secrets.NUGET_APIKEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate; done
     - name: Set Git Tag
       run: |
            NEW_TAG="${TagVersionPrefix}${{needs.build_tests.outputs.final_version}}"
@@ -97,4 +97,4 @@ jobs:
            git config user.name "GitHub Actions"
            git config user.email "github-actions@users.noreply.github.com"
            git tag -a $NEW_TAG -m "Release version $NEW_TAG"
-           git push origin $NEW_TAG
+           git push origin --tags
