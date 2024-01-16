@@ -64,8 +64,8 @@ jobs:
         if-no-files-found: error
         retention-days: 7
         path: |
-            ${{ env.BuildDirectory/*.nupkg }}
-            ${{ env.BuildDirectory/*.snupkg }}
+            ${{ env.BuildDirectory }}/*.nupkg
+            ${{ env.BuildDirectory }}/*.snupkg
     outputs:
      final_version: ${{ steps.define_version.outputs.FINAL_VERSION }}
 
