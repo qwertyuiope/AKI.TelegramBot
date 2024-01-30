@@ -1,4 +1,4 @@
-﻿using AKI.TelegramBot.ClientUtils.Models;
+using AKI.TelegramBot.ClientUtils.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,7 +53,7 @@ namespace AKI.TelegramBot.ClientUtils
                                                         lastMsgStartIdx: lastMsgStartIdx);
         }
         public static async Task<string> StreamMessages(this ITelegramBotClient telegramBotClient, long chatId,
-            IAsyncEnumerator<string> enumerator, CancellationToken cancellationToken, int delayTime = 750)
+            IAsyncEnumerator<string> enumerator, CancellationToken cancellationToken, int delayTime = 750, ParseMode parseMode = ParseMode.MarkdownV2)
         {
             var responseSb = new StringBuilder();
             Message lastMessage = null;
@@ -72,8 +72,9 @@ namespace AKI.TelegramBot.ClientUtils
                 lastPrint = false;
                 if (delay.IsCompleted)
                 {
-                    var messages = await telegramBotClient.SendMarkDownMessages(chatId: chatId,
+                    var messages = await telegramBotClient.SendMessages(chatId: chatId,
                                                                                 text: responseSb.ToString(),
+                                                                                parseMode: parseMode,
                                                                                 cancellationToken: cancellationToken,
                                                                                 messageId: lastMessage?.MessageId,
                                                                                 lastMsgStartIdx: lastMsgIdx);
@@ -95,7 +96,7 @@ namespace AKI.TelegramBot.ClientUtils
             var responseString = responseSb.ToString();
             if (!lastPrint)
             {
-                _ = await telegramBotClient.SendMarkDownMessages(chatId: chatId, text: responseString,
+                _ = await telegramBotClient.SendMessages(chatId: chatId, text: responseString, parseMode: ParseMode.Markdown,
                     cancellationToken: cancellationToken, messageId: lastMessage?.MessageId);
             }
 

@@ -52,7 +52,7 @@ jobs:
       uses: 5monkeys/cobertura-action@master
       with:
         path: ./**/TestResults/**/*.cobertura.xml
-        minimum_coverage: 0
+        minimum_coverage: 55
     - name: Define Version
       id: define_version
       run: |
