@@ -134,10 +134,10 @@ namespace AKI.TelegramBot.ClientUtils
         {
             switch (parseMode)
             {
-                case ParseMode.Markdown:
                 case ParseMode.MarkdownV2:
                     text = StringUtils.EscapeMarkdown(text);
                     break;
+                case ParseMode.Markdown:
                 case ParseMode.Html:
                     break;
                 default:
