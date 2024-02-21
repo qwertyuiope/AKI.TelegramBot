@@ -55,7 +55,7 @@ namespace AKI.TelegramBot.ClientUtils
         public static async Task<string> StreamMessages(this ITelegramBotClient telegramBotClient, long chatId,
             IAsyncEnumerator<string> enumerator, CancellationToken cancellationToken, int delayTime = 750, ParseMode parseMode = ParseMode.MarkdownV2)
         {
-            var responseSb = new StringBuilder();
+            ITextWriter responseSb = parseMode == ParseMode.Markdown ? new MarkdownTextWriter() : new RegularTextWriter();
             Message lastMessage = null;
 
             var delay = telegramBotClient.TypeWhileWait(chatId, Task.Delay(delayTime), cancellationToken);
@@ -65,32 +65,50 @@ namespace AKI.TelegramBot.ClientUtils
             var lastMsgIdx = 0;
             while (await enumerator.MoveNextAsync())
             {
-                var result = enumerator.Current;
-                if (result is null)
-                    continue;
-                responseSb.Append(result);
-                lastPrint = false;
-                if (delay.IsCompleted)
+                try
                 {
-                    var messages = await telegramBotClient.SendMessages(chatId: chatId,
-                                                                                text: responseSb.ToString(),
-                                                                                parseMode: parseMode,
-                                                                                cancellationToken: cancellationToken,
-                                                                                messageId: lastMessage?.MessageId,
-                                                                                lastMsgStartIdx: lastMsgIdx);
-                    lastMessage = messages.Messages.LastOrDefault();
-                    lastMsgIdx = messages.LastMessageStartIndex;
-                    if (typing-- == 0)
+                    var result = enumerator.Current;
+                    if (result is null)
+                        continue;
+                    responseSb.Append(result);
+                    lastPrint = false;
+                    var message = responseSb.ToString();
+
+                    if (delay.IsCompleted)
                     {
-                        delay = telegramBotClient.TypeWhileWait(chatId, Task.Delay(delayTime), cancellationToken);
-                        typing = initialTyping++;
+                        if (!responseSb.IsValid())
+                        {
+                            delay = Task.Delay(delayTime);
+                            continue;
+                        }
+
+                        var messages = await telegramBotClient.SendMessages(chatId: chatId,
+                                                                                    text: message,
+                                                                                    parseMode: parseMode,
+                                                                                    cancellationToken: cancellationToken,
+                                                                                    messageId: lastMessage?.MessageId,
+                                                                                    lastMsgStartIdx: lastMsgIdx);
+                        lastMessage = messages.Messages.LastOrDefault();
+                        lastMsgIdx = messages.LastMessageStartIndex;
+                        if (typing-- == 0)
+                        {
+                            delay = telegramBotClient.TypeWhileWait(chatId, Task.Delay(delayTime), cancellationToken);
+                            typing = initialTyping++;
+                        }
+                        else
+                        {
+                            delay = Task.Delay(delayTime);
+                        }
+                        lastPrint = true;
                     }
-                    else
-                    {
-                        delay = Task.Delay(delayTime);
-                    }
-                    lastPrint = true;
                 }
+                catch (Exception ex)
+                {
+                    if (ex is ApiRequestException apiEx && apiEx.Message.Contains("Can't find end of the entity starting at byte"))
+                        continue;
+                    throw;
+                }
+
             }
 
             var responseString = responseSb.ToString();
@@ -135,7 +153,7 @@ namespace AKI.TelegramBot.ClientUtils
             switch (parseMode)
             {
                 case ParseMode.MarkdownV2:
-                    text = StringUtils.EscapeMarkdown(text);
+                    text = StringUtils.EscapeMarkdownV2(text);
                     break;
                 case ParseMode.Markdown:
                 case ParseMode.Html:
@@ -158,10 +176,10 @@ namespace AKI.TelegramBot.ClientUtils
 
                 switch (parseMode)
                 {
-                    case ParseMode.Markdown:
                     case ParseMode.MarkdownV2:
                         message = StringUtils.EscapeFirstCharMarkdown(message);
                         break;
+                    case ParseMode.Markdown:
                     case ParseMode.Html:
                         break;
                     default:
@@ -178,10 +196,10 @@ namespace AKI.TelegramBot.ClientUtils
                 var message = total == 0 ? text : text.Substring(total * maxSize, last);
                 switch (parseMode)
                 {
-                    case ParseMode.Markdown:
                     case ParseMode.MarkdownV2:
                         message = StringUtils.EscapeFirstCharMarkdown(message);
                         break;
+                    case ParseMode.Markdown:
                     case ParseMode.Html:
                         break;
                     default:

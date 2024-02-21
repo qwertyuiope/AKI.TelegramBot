@@ -46,7 +46,7 @@ namespace AKI.TelegramBot.UnitTests.Fixtures.ClientUtils
             IReplyMarkup replyMarkup = null;
             int? messageId = null;
             var lastMsgStartIdx = 0;
-            var expected = StringUtils.EscapeMarkdown(text);
+            var expected = StringUtils.EscapeMarkdownV2(text);
 
             // Act
             var result = await _telegramClient.SendMarkDownMessages(chatId, text, cancellationToken, replyMarkup, messageId, lastMsgStartIdx);

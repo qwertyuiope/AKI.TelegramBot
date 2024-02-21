@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -10,7 +10,7 @@ namespace AKI.TelegramBot
         private const string MarkDownChars = @"*_`\[\]()<>#+\-=|{}.!";
         private static readonly IReadOnlyCollection<char> _markDownCharArray = MarkDownChars.ToArray();
         private static readonly Regex _markDownEscapeRegex = new($"([{MarkDownChars}])", RegexOptions.Compiled, TimeSpan.FromSeconds(5));
-        public static string EscapeMarkdown(string text)
+        public static string EscapeMarkdownV2(string text)
         {
             return _markDownEscapeRegex.Replace(text, @"\$1");
         }
