@@ -38,9 +38,5 @@ namespace AKI.TelegramBot.ClientUtils
         }
         private bool isCodeBlock = false;
         public override bool IsValid() => !isCodeBlock;
-        public override string ToString()
-        {
-            return _sb.ToString();
-        }
     }
 }

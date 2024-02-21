@@ -20,5 +20,9 @@ namespace AKI.TelegramBot.ClientUtils
         {
             return true;
         }
+        public override string ToString()
+        {
+            return _sb.ToString();
+        }
     }
 }

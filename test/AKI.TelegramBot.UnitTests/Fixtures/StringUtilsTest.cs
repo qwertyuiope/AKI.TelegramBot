@@ -13,7 +13,7 @@ namespace AKI.TelegramBot.UnitTests.Fixtures
             var expected = "Hello \\*World\\*\\!";
 
             // Act
-            var result = StringUtils.EscapeMarkdown(text);
+            var result = StringUtils.EscapeMarkdownV2(text);
 
             // Assert
             Assert.That(result, Is.EqualTo(expected));
