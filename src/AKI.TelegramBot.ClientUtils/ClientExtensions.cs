@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
@@ -52,15 +51,43 @@ namespace AKI.TelegramBot.ClientUtils
                                                         messageId,
                                                         lastMsgStartIdx: lastMsgStartIdx);
         }
+        private class TyperWaiter
+        {
+            private readonly ITelegramBotClient _telegramBotClient;
+            private readonly long _chatId;
+            private readonly int _delayTime;
+            private readonly CancellationToken _cancellationToken;
+            private byte _initialTyping;
+            private byte _typing = 0;
+            private Task _delayTask;
+
+            public TyperWaiter(ITelegramBotClient telegramBotClient, long chatId, int delayTime, CancellationToken cancellationToken, byte initialTyping = 4)
+            {
+                _telegramBotClient = telegramBotClient;
+                _chatId = chatId;
+                _delayTime = delayTime;
+                _cancellationToken = cancellationToken;
+                _initialTyping = initialTyping;
+                Restart();
+            }
+            public void Restart()
+            {
+                if (_typing-- <= 0)
+                {
+                    _delayTask = _telegramBotClient.TypeWhileWait(_chatId, Task.Delay(_delayTime), _cancellationToken);
+                    _typing = _initialTyping++;
+                    return;
+                }
+                _delayTask = Task.Delay(_delayTime, _cancellationToken);
+            }
+            public bool IsReady => _delayTask.IsCompleted;
+        }
         public static async Task<string> StreamMessages(this ITelegramBotClient telegramBotClient, long chatId,
             IAsyncEnumerator<string> enumerator, CancellationToken cancellationToken, int delayTime = 750, ParseMode parseMode = ParseMode.MarkdownV2)
         {
             ITextWriter responseSb = parseMode == ParseMode.Markdown ? new MarkdownTextWriter() : new RegularTextWriter();
             Message lastMessage = null;
-
-            var delay = telegramBotClient.TypeWhileWait(chatId, Task.Delay(delayTime), cancellationToken);
-            byte initialTyping = 4;
-            var typing = initialTyping++;
+            var typerWaiter = new TyperWaiter(telegramBotClient, chatId, delayTime, cancellationToken, 4);
             var lastPrint = false;
             var lastMsgIdx = 0;
             while (await enumerator.MoveNextAsync())
@@ -72,15 +99,15 @@ namespace AKI.TelegramBot.ClientUtils
                         continue;
                     responseSb.Append(result);
                     lastPrint = false;
-                    var message = responseSb.ToString();
 
-                    if (delay.IsCompleted)
+                    if (typerWaiter.IsReady)
                     {
                         if (!responseSb.IsValid())
                         {
-                            delay = Task.Delay(delayTime);
+                            typerWaiter.Restart();
                             continue;
                         }
+                        var message = responseSb.ToString();
 
                         var messages = await telegramBotClient.SendMessages(chatId: chatId,
                                                                                     text: message,
@@ -90,15 +117,7 @@ namespace AKI.TelegramBot.ClientUtils
                                                                                     lastMsgStartIdx: lastMsgIdx);
                         lastMessage = messages.Messages.LastOrDefault();
                         lastMsgIdx = messages.LastMessageStartIndex;
-                        if (typing-- == 0)
-                        {
-                            delay = telegramBotClient.TypeWhileWait(chatId, Task.Delay(delayTime), cancellationToken);
-                            typing = initialTyping++;
-                        }
-                        else
-                        {
-                            delay = Task.Delay(delayTime);
-                        }
+                        typerWaiter.Restart();
                         lastPrint = true;
                     }
                 }
@@ -119,7 +138,6 @@ namespace AKI.TelegramBot.ClientUtils
             }
 
             return responseString;
-
         }
 
         private static async Task<Message> SendMessageWithRetry(this ITelegramBotClient telegramBotClient, long chatId, string message,

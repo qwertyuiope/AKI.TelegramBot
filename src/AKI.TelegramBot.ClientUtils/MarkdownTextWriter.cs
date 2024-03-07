@@ -7,7 +7,6 @@ namespace AKI.TelegramBot.ClientUtils
 {
     internal class MarkdownTextWriter : BaseTextWriter
     {
-        private readonly StringBuilder _sb;
         //private static readonly IReadOnlyDictionary<string, MarkdownSyntaxRule> _openingSyntax = new Dictionary<string, MarkdownSyntaxRule>
         //{
         //    ["***"] = new MarkdownSyntaxRule("bold and italic"),
@@ -23,9 +22,8 @@ namespace AKI.TelegramBot.ClientUtils
         //    ["___"] = new MarkdownSyntaxRule("horizontal line"),
         //    ["~~~"] = new MarkdownSyntaxRule("block"),
         //};
-        public MarkdownTextWriter()
+        public MarkdownTextWriter() : base()
         {
-            _sb = new StringBuilder();
         }
         public override ITextWriter Append(string value)
         {
