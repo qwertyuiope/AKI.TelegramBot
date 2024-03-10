@@ -10,6 +10,9 @@ namespace AKI.TelegramBot.ClientUtils
         {
             _sb = new StringBuilder();
         }
+
+        public int Length => _sb.Length;
+
         public virtual ITextWriter Append(string value)
         {
             _sb.Append(value);

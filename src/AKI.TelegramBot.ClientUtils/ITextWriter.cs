@@ -5,5 +5,6 @@ namespace AKI.TelegramBot.ClientUtils
         ITextWriter Append(string value);
         bool IsValid();
         string ToString();
+        int Length {  get; }
     }
 }

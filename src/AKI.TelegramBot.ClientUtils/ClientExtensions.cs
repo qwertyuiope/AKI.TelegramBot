@@ -131,7 +131,7 @@ namespace AKI.TelegramBot.ClientUtils
             }
 
             var responseString = responseSb.ToString();
-            if (!lastPrint)
+            if (!lastPrint && !string.IsNullOrEmpty(responseString))
             {
                 _ = await telegramBotClient.SendMessages(chatId: chatId, text: responseString, parseMode: ParseMode.Markdown,
                     cancellationToken: cancellationToken, messageId: lastMessage?.MessageId);
